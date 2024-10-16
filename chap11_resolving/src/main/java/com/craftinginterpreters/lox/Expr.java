@@ -2,6 +2,8 @@ package com.craftinginterpreters.lox;
 
 import java.util.List;
 
+import com.craftinginterpreters.lox.Stmt.Function;
+
 abstract class Expr {
   interface Visitor<R> {
     R visitAssignExpr(Assign expr);
@@ -12,6 +14,24 @@ abstract class Expr {
     R visitLogicalExpr(Logical expr);
     R visitUnaryExpr(Unary expr);
     R visitVariableExpr(Variable expr);
+    R visitFunctionExpr(Function expr);
+  }
+
+  static class Function extends Expr {
+    Function(Token name, List<Token> params, List<Stmt> body) {
+      this.name = name;
+      this.params = params;
+      this.body = body;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitFunctionExpr(this);
+    }
+
+    final Token name;
+    final List<Token> params;
+    final List<Stmt> body;
   }
 
   // Nested Expr classes here...

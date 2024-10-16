@@ -6,81 +6,171 @@ import java.util.List;
 import java.util.Map;
 
 class Interpreter implements Expr.Visitor<Object>,
-                             Stmt.Visitor<Void> {
+    Stmt.Visitor<Void> {
   final Environment globals = new Environment();
   private Environment environment = globals;
   private final Map<Expr, Integer> locals = new HashMap<>();
 
+  public class Break extends RuntimeException { // Added
+    Break() {
+      super(null, null, false, false);
+    }
+  }
+
   Interpreter() {
-    globals.define("clock", new LoxCallable() { 
-      @Override public int arity() { return 0; }
-      @Override public Object call(Interpreter interpreter, List<Object> arguments) {
-        return (double)System.currentTimeMillis() / 1000.0;
+    globals.define("clock", new LoxCallable() {
+      @Override
+      public int arity() {
+        return 0;
       }
-      @Override public String toString() { return "<native fn>"; }
+
+      @Override
+      public Object call(Interpreter interpreter, List<Object> arguments) {
+        return (double) System.currentTimeMillis() / 1000.0;
+      }
+
+      @Override
+      public String toString() {
+        return "<native fn>";
+      }
     });
     globals.define("stringify", new LoxCallable() {
-      @Override public int arity() { return 1; }
-      @Override public Object call(Interpreter interpreter, List<Object> arguments) {
+      @Override
+      public int arity() {
+        return 1;
+      }
+
+      @Override
+      public Object call(Interpreter interpreter, List<Object> arguments) {
         return stringify(arguments.get(0));
       }
-      @Override public String toString() { return "<native fn>"; }
+
+      @Override
+      public String toString() {
+        return "<native fn>";
+      }
     });
-    record Cons (Object car, Object cdr) {
-      @Override public final String toString() {
+    record Cons(Object car, Object cdr) {
+      @Override
+      public final String toString() {
         return "(" + stringify(car) + " . " + stringify(cdr) + ")";
       }
     }
     globals.define("cons", new LoxCallable() {
-      @Override public int arity() { return 2; }
-      @Override public Object call(Interpreter interpreter, List<Object> arguments) {
+      @Override
+      public int arity() {
+        return 2;
+      }
+
+      @Override
+      public Object call(Interpreter interpreter, List<Object> arguments) {
         return new Cons(arguments.get(0), arguments.get(1));
       }
-      @Override public String toString() { return "<native fn>"; }
+
+      @Override
+      public String toString() {
+        return "<native fn>";
+      }
     });
     globals.define("car", new LoxCallable() {
-      @Override public int arity() { return 1; }
-      @Override public Object call(Interpreter interpreter, List<Object> arguments) {
-        if (!(arguments.get(0) instanceof Cons)) throw new RuntimeError(null, "car/cdr expected Cons object");
-        return ((Cons)arguments.get(0)).car;
+      @Override
+      public int arity() {
+        return 1;
       }
-      @Override public String toString() { return "<native fn>"; }
+
+      @Override
+      public Object call(Interpreter interpreter, List<Object> arguments) {
+        if (!(arguments.get(0) instanceof Cons))
+          throw new RuntimeError(null, "car/cdr expected Cons object");
+        return ((Cons) arguments.get(0)).car;
+      }
+
+      @Override
+      public String toString() {
+        return "<native fn>";
+      }
     });
     globals.define("cdr", new LoxCallable() {
-      @Override public int arity() { return 1; }
-      @Override public Object call(Interpreter interpreter, List<Object> arguments) {
-        if (!(arguments.get(0) instanceof Cons)) throw new RuntimeError(null, "car/cdr expected Cons object");
-        return ((Cons)arguments.get(0)).cdr;
+      @Override
+      public int arity() {
+        return 1;
       }
-      @Override public String toString() { return "<native fn>"; }
+
+      @Override
+      public Object call(Interpreter interpreter, List<Object> arguments) {
+        if (!(arguments.get(0) instanceof Cons))
+          throw new RuntimeError(null, "car/cdr expected Cons object");
+        return ((Cons) arguments.get(0)).cdr;
+      }
+
+      @Override
+      public String toString() {
+        return "<native fn>";
+      }
     });
     globals.define("isPair", new LoxCallable() {
-      @Override public int arity() { return 1; }
-      @Override public Object call(Interpreter interpreter, List<Object> arguments) {
+      @Override
+      public int arity() {
+        return 1;
+      }
+
+      @Override
+      public Object call(Interpreter interpreter, List<Object> arguments) {
         return arguments.get(0) instanceof Cons;
       }
-      @Override public String toString() { return "<native fn>"; }
+
+      @Override
+      public String toString() {
+        return "<native fn>";
+      }
     });
     globals.define("isString", new LoxCallable() {
-      @Override public int arity() { return 1; }
-      @Override public Object call(Interpreter interpreter, List<Object> arguments) {
+      @Override
+      public int arity() {
+        return 1;
+      }
+
+      @Override
+      public Object call(Interpreter interpreter, List<Object> arguments) {
         return arguments.get(0) instanceof String;
       }
-      @Override public String toString() { return "<native fn>"; }
+
+      @Override
+      public String toString() {
+        return "<native fn>";
+      }
     });
     globals.define("isNumber", new LoxCallable() {
-      @Override public int arity() { return 1; }
-      @Override public Object call(Interpreter interpreter, List<Object> arguments) {
+      @Override
+      public int arity() {
+        return 1;
+      }
+
+      @Override
+      public Object call(Interpreter interpreter, List<Object> arguments) {
         return arguments.get(0) instanceof Double;
       }
-      @Override public String toString() { return "<native fn>"; }
+
+      @Override
+      public String toString() {
+        return "<native fn>";
+      }
     });
     globals.define("isBoolean", new LoxCallable() {
-      @Override public int arity() { return 1; }
-      @Override public Object call(Interpreter interpreter, List<Object> arguments) {
+      @Override
+      public int arity() {
+        return 1;
+      }
+
+      @Override
+      public Object call(Interpreter interpreter, List<Object> arguments) {
         return arguments.get(0) instanceof Boolean;
       }
-      @Override public String toString() { return "<native fn>"; }
+
+      @Override
+      public String toString() {
+        return "<native fn>";
+      }
     });
   }
 
@@ -93,17 +183,21 @@ class Interpreter implements Expr.Visitor<Object>,
       Lox.runtimeError(error);
     }
   }
+
   private Object evaluate(Expr expr) {
     return expr.accept(this);
   }
+
   private void execute(Stmt stmt) {
     stmt.accept(this);
   }
+
   void resolve(Expr expr, int depth) {
     locals.put(expr, depth);
   }
+
   void executeBlock(List<Stmt> statements,
-                    Environment environment) {
+      Environment environment) {
     Environment previous = this.environment;
     try {
       this.environment = environment;
@@ -115,22 +209,26 @@ class Interpreter implements Expr.Visitor<Object>,
       this.environment = previous;
     }
   }
+
   @Override
   public Void visitBlockStmt(Stmt.Block stmt) {
     executeBlock(stmt.statements, new Environment(environment));
     return null;
   }
+
   @Override
   public Void visitExpressionStmt(Stmt.Expression stmt) {
     evaluate(stmt.expression);
     return null;
   }
+
   @Override
   public Void visitFunctionStmt(Stmt.Function stmt) {
     LoxFunction function = new LoxFunction(stmt, environment);
     environment.define(stmt.name.lexeme, function);
     return null;
   }
+
   @Override
   public Void visitIfStmt(Stmt.If stmt) {
     if (isTruthy(evaluate(stmt.condition))) {
@@ -140,19 +238,23 @@ class Interpreter implements Expr.Visitor<Object>,
     }
     return null;
   }
+
   @Override
   public Void visitPrintStmt(Stmt.Print stmt) {
     Object value = evaluate(stmt.expression);
     System.out.println(stringify(value));
     return null;
   }
+
   @Override
   public Void visitReturnStmt(Stmt.Return stmt) {
     Object value = null;
-    if (stmt.value != null) value = evaluate(stmt.value);
+    if (stmt.value != null)
+      value = evaluate(stmt.value);
 
     throw new Return(value);
   }
+
   @Override
   public Void visitVarStmt(Stmt.Var stmt) {
     Object value = null;
@@ -163,13 +265,26 @@ class Interpreter implements Expr.Visitor<Object>,
     environment.define(stmt.name.lexeme, value);
     return null;
   }
-  @Override
+
+  // @Override
+  // public Void visitWhileStmt(Stmt.While stmt) {
+  // while (isTruthy(evaluate(stmt.condition))) {
+  // execute(stmt.body);
+  // }
+  // return null;
+  // }
+  @Override //Added
   public Void visitWhileStmt(Stmt.While stmt) {
-    while (isTruthy(evaluate(stmt.condition))) {
-      execute(stmt.body);
+    try {
+      while (isTruthy(evaluate(stmt.condition))) {
+        execute(stmt.body);
+      }
+    } catch (Break ex) {
+      // Break out of the loop.
     }
     return null;
   }
+
   @Override
   public Object visitAssignExpr(Expr.Assign expr) {
     Object value = evaluate(expr.value);
@@ -183,53 +298,58 @@ class Interpreter implements Expr.Visitor<Object>,
 
     return value;
   }
+
   @Override
   public Object visitBinaryExpr(Expr.Binary expr) {
     Object left = evaluate(expr.left);
     Object right = evaluate(expr.right);
 
     switch (expr.operator.type) {
-      case BANG_EQUAL: return !isEqual(left, right);
-      case EQUAL_EQUAL: return isEqual(left, right);
+      case BANG_EQUAL:
+        return !isEqual(left, right);
+      case EQUAL_EQUAL:
+        return isEqual(left, right);
       case GREATER:
         checkNumberOperands(expr.operator, left, right);
-        return (double)left > (double)right;
+        return (double) left > (double) right;
       case GREATER_EQUAL:
         checkNumberOperands(expr.operator, left, right);
-        return (double)left >= (double)right;
+        return (double) left >= (double) right;
       case LESS:
         checkNumberOperands(expr.operator, left, right);
-        return (double)left < (double)right;
+        return (double) left < (double) right;
       case LESS_EQUAL:
         checkNumberOperands(expr.operator, left, right);
-        return (double)left <= (double)right;
+        return (double) left <= (double) right;
       case MINUS:
         checkNumberOperands(expr.operator, left, right);
-        return (double)left - (double)right;
+        return (double) left - (double) right;
       case PLUS:
         if (left instanceof Double && right instanceof Double) {
-          return (double)left + (double)right;
+          return (double) left + (double) right;
         }
 
         if (left instanceof String && right instanceof String) {
-          return (String)left + (String)right;
+          return (String) left + (String) right;
         }
 
         throw new RuntimeError(expr.operator,
             "Operands must be two numbers or two strings.");
       case SLASH:
         checkNumberOperands(expr.operator, left, right);
-        return (double)left / (double)right;
+        return (double) left / (double) right;
       case STAR:
         checkNumberOperands(expr.operator, left, right);
-        return (double)left * (double)right;
+        return (double) left * (double) right;
       case PERCENT:
         checkNumberOperands(expr.operator, left, right);
-        return (double)left % (double)right;        }
+        return (double) left % (double) right;
+    }
 
     // Unreachable.
     return null;
   }
+
   @Override
   public Object visitCallExpr(Expr.Call expr) {
     Object callee = evaluate(expr.callee);
@@ -244,7 +364,7 @@ class Interpreter implements Expr.Visitor<Object>,
           "Can only call functions and classes.");
     }
 
-    LoxCallable function = (LoxCallable)callee;
+    LoxCallable function = (LoxCallable) callee;
     if (arguments.size() != function.arity()) {
       throw new RuntimeError(expr.paren, "Expected " +
           function.arity() + " arguments but got " +
@@ -253,26 +373,37 @@ class Interpreter implements Expr.Visitor<Object>,
 
     return function.call(this, arguments);
   }
+
   @Override
   public Object visitGroupingExpr(Expr.Grouping expr) {
     return evaluate(expr.expression);
   }
+
   @Override
   public Object visitLiteralExpr(Expr.Literal expr) {
     return expr.value;
   }
+
   @Override
   public Object visitLogicalExpr(Expr.Logical expr) {
     Object left = evaluate(expr.left);
 
     if (expr.operator.type == TokenType.OR) {
-      if (isTruthy(left)) return left;
+      if (isTruthy(left))
+        return left;
     } else {
-      if (!isTruthy(left)) return left;
+      if (!isTruthy(left))
+        return left;
     }
 
     return evaluate(expr.right);
   }
+
+  @Override
+  public Object visitFunctionExpr(Expr.Function expr) {
+    return new LoxFunction(expr, environment);
+  }
+
   @Override
   public Object visitUnaryExpr(Expr.Unary expr) {
     Object right = evaluate(expr.right);
@@ -282,16 +413,18 @@ class Interpreter implements Expr.Visitor<Object>,
         return !isTruthy(right);
       case MINUS:
         checkNumberOperand(expr.operator, right);
-        return -(double)right;
+        return -(double) right;
     }
 
     // Unreachable.
     return null;
   }
+
   @Override
   public Object visitVariableExpr(Expr.Variable expr) {
     return lookUpVariable(expr.name, expr);
   }
+
   private Object lookUpVariable(Token name, Expr expr) {
     Integer distance = locals.get(expr);
     if (distance != null) {
@@ -300,29 +433,46 @@ class Interpreter implements Expr.Visitor<Object>,
       return globals.get(name);
     }
   }
+
+  @Override
+  public Void visitBreakStmt(Stmt.Break stmt) { // Added
+    throw new Break();
+  }
+
   private static void checkNumberOperand(Token operator, Object operand) {
-    if (operand instanceof Double) return;
+    if (operand instanceof Double)
+      return;
     throw new RuntimeError(operator, "Operand must be a number.");
   }
+
   private static void checkNumberOperands(Token operator,
-                                   Object left, Object right) {
-    if (left instanceof Double && right instanceof Double) return;
-   
+      Object left, Object right) {
+    if (left instanceof Double && right instanceof Double)
+      return;
+
     throw new RuntimeError(operator, "Operands must be numbers.");
   }
+
   private static boolean isTruthy(Object object) {
-    if (object == null) return false;
-    if (object instanceof Boolean) return (boolean)object;
+    if (object == null)
+      return false;
+    if (object instanceof Boolean)
+      return (boolean) object;
     return true;
   }
+
   private static boolean isEqual(Object a, Object b) {
-    if (a == null && b == null) return true;
-    if (a == null) return false;
+    if (a == null && b == null)
+      return true;
+    if (a == null)
+      return false;
 
     return a.equals(b);
   }
+
   private static String stringify(Object object) {
-    if (object == null) return "nil";
+    if (object == null)
+      return "nil";
 
     if (object instanceof Double) {
       String text = object.toString();
