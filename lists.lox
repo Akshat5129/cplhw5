@@ -1,0 +1,45 @@
+fun toString(xs) {
+  if (xs == nil) {
+    return "";
+  } else {
+    return stringify(car(xs)) + " " + toString(cdr(xs));
+  }
+}
+var xs = cons(11, cons(21, cons(31, nil)));
+print toString(xs);
+
+
+fun map(xs, f) {
+  if (xs == nil) {
+    return nil;
+  } else {
+    return cons(f(car(xs)), map(cdr(xs), f));
+  }
+}
+fun add100(x) { return x + 100; }
+print toString(map(xs, add100));
+
+
+fun foldl(xs, z, f) {
+  if (xs == nil) {
+    return z;
+  } else {
+    return foldl(cdr(xs), f(z,car(xs)), f);
+  }
+}
+fun add(x, y) { return x + y; }
+print foldl(xs, 0, add);
+
+
+fun isList(xs) {
+  if (xs == nil) {
+    return true;
+  } else {
+    return isPair(xs) and isList(cdr(xs));
+  }
+}
+print isPair(xs);
+print isList(xs);
+var p = cons(1, "dog");
+print isPair(p);
+print isList(p);
