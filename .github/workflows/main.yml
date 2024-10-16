@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Maven CI
 
 on:
   push:
@@ -16,11 +16,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17'  # You can change this to the version required by your project
+          java-version: '21'
 
       - name: Cache Maven dependencies
         uses: actions/cache@v3
@@ -31,12 +31,10 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Compile with Maven
-        run: mvn -B compile
-        # `-B` runs Maven in batch mode (for better log output)
+        run: mvn compile
 
       - name: Run tests with Maven
-        run: mvn -B test
+        run: mvn test
 
       - name: Show Test Results
         run: cat target/surefire-reports/*.txt || true
-        # This will output test results even if the tests fail, so you can see the reason.
